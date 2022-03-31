@@ -1,0 +1,27 @@
+{
+  "name": "oembed.js",
+  "version": "1.0.1",
+  "description": "oEmbed implementation for JavaScript",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "keywords": [
+    "oembed"
+  ],
+  "author": "Lars Kölker <lars@koelker.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "jsdom": "^19.0.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lars418/oembed-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lars418/oembed-js/issues"
+  },
+  "homepage": "https://github.com/Lars418/oembed-js#readme"
+}

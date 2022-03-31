@@ -1,9 +1,8 @@
-import axios from "axios";
-import jsdom from "jsdom";
+const axios = require('axios');
+const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
-
-export default class oEmbed {
+class oEmbed {
     /**
      * @description Creates oEmbed class using the given list of providers
      * @param providers {object[]} Configuration file
@@ -62,8 +61,6 @@ export default class oEmbed {
         const baseUrl = new URL(url).origin;
         const provider = this.providers.find(provider => provider.url === baseUrl);
 
-        console.log('Has Provider', provider);
-
         if (provider) {
             const { preferredFormat } = this.config;
             let endpoint = null;
@@ -90,8 +87,6 @@ export default class oEmbed {
 
         const computedProvider = await this.getProviderUrl(url);
 
-        console.log(computedProvider);
-
         if (computedProvider.length === 0) {
             return null;
         }
@@ -100,7 +95,6 @@ export default class oEmbed {
 
         return result.data;
     }
-
-
-
 }
+
+module.exports = oEmbed;
