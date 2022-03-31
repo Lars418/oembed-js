@@ -1,4 +1,4 @@
-# oembed-js
+# oembed.js
 oEmbed.js is a JavaScript implementation of the [oEmbed format](https://oembed.com/).
 
 ## Features
