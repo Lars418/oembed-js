@@ -60,7 +60,7 @@ class oEmbed {
      * */
     async getData(url, useProviderLookup=true) {
         const baseUrl = new URL(url).origin;
-        const provider = this.providers.find(provider => provider.url === baseUrl);
+        const provider = this.providers.find(provider => provider.url.replace(/\/$/, '') === baseUrl);
 
         if (provider) {
             const { preferredFormat } = this.config;
