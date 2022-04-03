@@ -6,7 +6,7 @@ oEmbed.js is a JavaScript implementation of the [oEmbed format](https://oembed.c
 
 ## Installing
 ```
-npm install oEmbed.js
+npm install oembed.js
 ```
 
 ## API
@@ -58,10 +58,10 @@ return a `Promise<string[]>`, otherwise an empty `Promise<string[]>`.
 
 > This method does not check the providers list.
 
-### Method `async getData(url): Promise<object | null>`
+### Method `async getData(url, useProviderLookup=true): Promise<object | null>`
 This method will check the given providers list for the `url` host. If the
-host is not inside the providers list, the host given `url` will be fetched
-and checked for an oEmbed url.
+host is not inside the providers list, the given host of `url` will be fetched
+and checked for an oEmbed url, if `useProviderLookup` is enabled.
 
 If no oEmbed url was found, `Promise<null>` will be returned, otherwise an `Promise<object>`
 with the fetched data.

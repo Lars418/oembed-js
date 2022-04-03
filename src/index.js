@@ -55,9 +55,10 @@ class oEmbed {
     /**
      * @description Gets oEmbed data for the given url
      * @param url {string} The url to get the oEmbed data for
+     * @param useProviderLookup {boolean} Fetch url for oEmbed information
      * @returns {Promise<object>}
      * */
-    async getData(url) {
+    async getData(url, useProviderLookup=true) {
         const baseUrl = new URL(url).origin;
         const provider = this.providers.find(provider => provider.url === baseUrl);
 
@@ -83,6 +84,10 @@ class oEmbed {
             const result = await axios.get(constructedUrl);
 
             return result.data;
+        }
+
+        if (!useProviderLookup) {
+            return null;
         }
 
         const computedProvider = await this.getProviderUrl(url);
