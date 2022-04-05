@@ -26,6 +26,7 @@ class oEmbed {
 
         this.config = {
             preferredFormat: 'json',
+            metaAppId: null,
             ...config
         };
     }
@@ -56,11 +57,13 @@ class oEmbed {
      * @description Gets oEmbed data for the given url
      * @param url {string} The url to get the oEmbed data for
      * @param useProviderLookup {boolean} Fetch url for oEmbed information
+     * @param metaAppId {string|null} App-ID for Facebook and Instagram
      * @returns {Promise<object>}
      * */
-    async getData(url, useProviderLookup=true) {
+    async getData(url, useProviderLookup=true, metaAppId=null) {
         const baseUrl = new URL(url).origin;
         const provider = this.providers.find(provider => provider.url.replace(/\/$/, '') === baseUrl);
+        const computedMetaAppId = metaAppId || this.config.metaAppId;
 
         if (provider) {
             const { preferredFormat } = this.config;
@@ -80,7 +83,12 @@ class oEmbed {
                 return null;
             }
 
-            const constructedUrl = `${endpoint.url}?url=${encodeURIComponent(url)}&format=${preferredFormat}`;
+            let constructedUrl = `${endpoint.url}?url=${encodeURIComponent(url)}&format=${preferredFormat}`;
+
+            if (baseUrl.match(/^https:\/\/graph\.facebook\.com\/.*/) && computedMetaAppId) {
+                constructedUrl += `&access_token=${computedMetaAppId}`;
+            }
+
             const result = await axios.get(constructedUrl);
 
             return result.data;

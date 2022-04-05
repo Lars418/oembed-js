@@ -47,7 +47,8 @@ The selected format will be appended to the oEmbed requests, there is no
 guarantee that a page will respect the format. `format` defaults to `json`.
 ```js
 {
-  format: "json" // "json" or "xml"
+  format: "json", // "json" or "xml"
+  metaAppId: null //  Meta App-ID (optional)
 }
 ```
 
@@ -58,10 +59,11 @@ return a `Promise<string[]>`, otherwise an empty `Promise<string[]>`.
 
 > This method does not check the providers list.
 
-### Method `async getData(url, useProviderLookup=true): Promise<object | null>`
+### Method `async getData(url, useProviderLookup=true, metaAppId=null): Promise<object | null>`
 This method will check the given providers list for the `url` host. If the
 host is not inside the providers list, the given host of `url` will be fetched
-and checked for an oEmbed url, if `useProviderLookup` is enabled.
+and checked for an oEmbed url, if `useProviderLookup` is enabled. `metaAppId` can
+either be specified in the initial config or using the parameter as a fallback.
 
 If no oEmbed url was found, `Promise<null>` will be returned, otherwise an `Promise<object>`
 with the fetched data.
