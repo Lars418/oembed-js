@@ -72,7 +72,7 @@ class oEmbed {
             if (provider.endpoints.length > 1 ) {
                 const endPointWithPreferredFormat = provider.endpoints.find(endpoint => endpoint.url.toLowerCase().includes(preferredFormat.toLowerCase()));
 
-                if (endPointWithPreferredFormat.schemes.some(scheme => url.match(scheme))) {
+                if (endPointWithPreferredFormat && endPointWithPreferredFormat.schemes.some(scheme => url.match(scheme))) {
                     endpoint = endPointWithPreferredFormat;
                 }
             }
