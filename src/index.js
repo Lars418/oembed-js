@@ -24,9 +24,20 @@ class oEmbed {
             throw new Error('Invalid format: ' + config.format);
         }
 
+        if (config.maxWidth && Number.isNaN(+config.maxWidth)) {
+            throw new Error('Invalid maxWidth: ' + config.maxWidth);
+        }
+
+        if (config.maxHeight && Number.isNaN(+config.maxHeight)) {
+            throw new Error('Invalid maxWidth: ' + config.maxHeight);
+        }
+
         this.config = {
-            preferredFormat: 'json',
-            metaAppId: null,
+            format: 'json',
+            maxWidth: undefined,
+            maxHeight: undefined,
+            oembedParameters: {},
+            debug: false,
             ...config
         };
     }
@@ -54,23 +65,50 @@ class oEmbed {
     }
 
     /**
+     * @private
+     * @description Constructs the oembed endpoint url
+     * @param oembedUrl {string} Oembed URL
+     * @param url {string} URL to get Oembed data from
+     * @param parameters {object} Optional URL parameters
+     * */
+    _constructOembedUrl(oembedUrl, url, parameters) {
+        const { format, maxWidth, maxHeight } = this.config;
+        const preparedParameters = Object.entries(parameters).map(parameter => `${parameter[0]}=${encodeURIComponent(parameter[1])}`).join('&');
+
+        if (Object.keys(parameters).length === 0 && maxWidth === undefined && maxHeight === undefined) {
+            return `${oembedUrl}?url=${encodeURIComponent(url)}&format=${format}`;
+        }
+
+        let preparedUrl = `${oembedUrl}?url=${encodeURIComponent(url)}&format=${format}&${preparedParameters}`;
+
+        if (maxWidth) {
+            preparedUrl += `&maxwidth=${maxWidth}`;
+        }
+
+        if (maxHeight) {
+            preparedUrl += `&maxheight=${maxHeight}`;
+        }
+
+        return preparedUrl;
+    }
+
+    /**
      * @description Gets oEmbed data for the given url
      * @param url {string} The url to get the oEmbed data for
      * @param useProviderLookup {boolean} Fetch url for oEmbed information
-     * @param metaAppId {string|null} App-ID for Facebook and Instagram
      * @returns {Promise<object>}
      * */
-    async getData(url, useProviderLookup=true, metaAppId=null) {
-        const baseUrl = new URL(url).origin;
-        const provider = this.providers.find(provider => provider.url.replace(/\/$/, '') === baseUrl);
-        const computedMetaAppId = metaAppId || this.config.metaAppId;
+    async getData(url, useProviderLookup=true) {
+        const baseUrl = new URL(url).origin.replace('://www.', '://');
+        const provider = this.providers.find(provider => provider.url.replace(/\/$/, '').replace('://www.', '://') === baseUrl);
+        const { oembedParameters } = this.config;
 
         if (provider) {
-            const { preferredFormat } = this.config;
+            const { format } = this.config;
             let endpoint = null;
 
             if (provider.endpoints.length > 1 ) {
-                const endPointWithPreferredFormat = provider.endpoints.find(endpoint => endpoint.url.toLowerCase().includes(preferredFormat.toLowerCase()));
+                const endPointWithPreferredFormat = provider.endpoints.find(endpoint => endpoint.url.toLowerCase().includes(format.toLowerCase()));
 
                 if (endPointWithPreferredFormat && endPointWithPreferredFormat.schemes.some(scheme => url.match(scheme))) {
                     endpoint = endPointWithPreferredFormat;
@@ -83,11 +121,14 @@ class oEmbed {
                 return null;
             }
 
-            let constructedUrl = `${endpoint.url}?url=${encodeURIComponent(url)}&format=${preferredFormat}`;
+            const foundParameters = Object.entries(oembedParameters)
+                .map(entry => [entry[0].replace(/\/$/, ''), entry[1]]) // Replace trailing slash on origin
+                .find(entry => entry[0] === new URL(endpoint.url).origin.replace(/\/$/, ''));
+            const parameters = (Array.isArray(foundParameters) && foundParameters.length === 2)
+                                    ? foundParameters[1]
+                                    : {};
 
-            if (baseUrl.match(/^https:\/\/graph\.facebook\.com\/.*/) && computedMetaAppId) {
-                constructedUrl += `&access_token=${computedMetaAppId}`;
-            }
+            const constructedUrl = this._constructOembedUrl(endpoint.url, url, parameters);
 
             const result = await axios.get(constructedUrl);
 
