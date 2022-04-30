@@ -11,12 +11,14 @@ class oEmbed {
     constructor(providers, config = {}) {
         // Replace asterisk with regex expression and adjust naming
         this.providers = providers.map(provider => ({
-            url: provider.provider_url,
+            url: provider.provider_url.replace(/^https?:\/\//i, 'https?://'),
             endpoints: provider.endpoints.map(endpoint => ({
                 url: endpoint.url.replace(/\*/g, '.*'),
                 schemes: !endpoint.schemes
-                    ? [ provider.provider_url.endsWith('/') ? `${provider.provider_url}.*` :  `${provider.provider_url}/.*` ]
-                    : endpoint.schemes.map(scheme => scheme.replace(/\*/g, '.*'))
+                    ? [ provider.provider_url.endsWith('/')
+                        ? `${provider.provider_url.replace(/^https?:\/\//i, 'https?://')}.*`
+                        :  `${provider.provider_url.replace(/^https?:\/\//i, 'https?://')}/.*` ]
+                    : endpoint.schemes.map(scheme => scheme.replace(/\*/g, '.*').replace(/^https?:\/\//i, 'https?://'))
             }))
         }));
 
@@ -100,7 +102,7 @@ class oEmbed {
      * */
     async getData(url, useProviderLookup=true) {
         const baseUrl = new URL(url).origin.replace('://www.', '://');
-        const provider = this.providers.find(provider => provider.url.replace(/\/$/, '').replace('://www.', '://') === baseUrl);
+        const provider = this.providers.find(provider => baseUrl.match(provider.url.replace(/\/$/, '').replace('://www.', '://')));
         const { oembedParameters } = this.config;
 
         if (provider) {
